@@ -33,7 +33,11 @@ function ZCR = zcr(X, N, L)
     ZCR = [];
     m = 0;
     while m * L + N-1 + 1 <= length(X)
-        ZCR = [ ZCR sum( abs(sign(X(m*L+1))-sign(X(m*L+N-1+1))))/2*(N-1)];
+        ZCR = [ ZCR sum( abs(sgn(X(m*L+1))-sgn(X(m*L+N-1+1))))/2*(N-1)];
         m = m + 1;
     end
+end
+
+function s = sgn(x)
+    s = 1*(x>=0) + (-1)*(x<0);
 end
