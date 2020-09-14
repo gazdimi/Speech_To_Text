@@ -19,7 +19,7 @@ ZCR = zcr(filteredSignal(:,1), 4096, 2048);
 function E = short_time_energy(X, N, L) %signal, segment, overlap
     m=0;
     E=[];
-    while m * L + N-1 + 1 <= length(X)
+    while m * L + N-1 + 1 <= length(X) %while current window has not reached end of signal (is not the last one)
         E = [ E sum( X(m*L+1:m*L+N-1+1).^2)/N];
         m = m + 1;
     end
@@ -29,7 +29,9 @@ function ZCR = zcr(X, N, L)
     ZCR = [];
     m = 0;
     while m * L + N-1 + 1 <= length(X)
-        ZCR = [ ZCR sum( abs(sgn(X(m*L+1))-sgn(X(m*L+N-1+1))))/(2*(N-1))];
+        odd = X(m*L+1:2:m*L+N-1+1);
+        even = X(m*L+2:2:m*L+N-1+1);
+        ZCR = [ ZCR sum( abs(sgn(odd)-sgn(even)))/(2*(N-1))];
         m = m + 1;
     end
 end
