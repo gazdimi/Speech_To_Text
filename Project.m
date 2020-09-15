@@ -34,18 +34,17 @@ diff = []; %difference between ZCR peaks to detect voiced areas
 for i=1:length(indexes)-1
     diff(i)=indexes(i+1)-indexes(i);
 end
+
 digits = [];
 j=1;
-
-%{ 
----working on it-----
-
-digit(1,1) = ZCR_peaks(indexes(1));
+digits(1,1) = indexes(1);
 for i=2:length(indexes)
-    digit(i,j) = 
-   if(diff(i)>round(max(diff)/2))
+    if(diff(i-1)>round(max(diff)/2))
+        j = j + 1;
+    end
+    digits(j,i) = indexes(i);
 end
-%}
+
 
 function E = short_time_energy(X, N, L) %signal, segment, overlap
     m=0;
