@@ -22,33 +22,7 @@ DZCR = 10*log10(ZCR);   %zero crossing rate in decibel
 ZCR_peaks = points_of_interest(DZCR);
 %figure, plot(DZCR, '-b'); hold on; plot(ZCR_peaks, 'linestyle', 'none', 'marker','*'); hold on;
 
-indexes = []; %column positions of ZCR_peaks when value exists
-j = 1;
-for i=1:length(ZCR_peaks)
-     if(not(isnan(ZCR_peaks(i))))
-         indexes(j) = i;
-         j = j + 1;
-     end
-end
-diff = []; %difference between ZCR peaks to detect voiced areas
-for i=1:length(indexes)-1
-    diff(i)=indexes(i+1)-indexes(i);
-end
-%S={{1,2,3,7,8,10}; {4,5,6}; {7,8}}; | S{3,1} | S{3,1}{:} example with cell
-%array
-digits = {};
-j=1;
-digits{1,1}{1} = indexes(1);
-k = 2;
-for i=2:length(indexes)
-    if(diff(i-1)>round(max(diff)/2))
-        j = j + 1;
-        k = 1;
-    end 
-    digits{j,1}{k} = indexes(i);
-    k = k + 1;
-end
-
+D = detect_window_digits(ZCR_peaks);
 
 function E = short_time_energy(X, N, L) %signal, segment, overlap
     m=0;
@@ -82,5 +56,34 @@ function P = points_of_interest(Y) %input in decibel
         else
             P(i) = NaN;
         end
+    end
+end
+
+function D = detect_window_digits(ZCR_peaks)
+    D = {}; %return cell array, #rows = #digits, each row contains window identifiers per digit
+    indexes = []; %column positions of ZCR_peaks when value exists
+    j = 1;
+    for i=1:length(ZCR_peaks)
+        if(not(isnan(ZCR_peaks(i))))
+            indexes(j) = i;
+            j = j + 1;
+        end
+    end
+    %--------------------------------------------------------------
+    diff = []; %difference between ZCR peaks to detect voiced areas
+    for i=1:length(indexes)-1
+        diff(i)=indexes(i+1)-indexes(i);
+    end
+    %--------------------------------------------------------------
+    j = 1;
+    D{1,1}{1} = indexes(1);
+    k = 2;
+    for i=2:length(indexes)
+        if(diff(i-1)>round(max(diff)/2))
+            j = j + 1;
+            k = 1;
+        end 
+        D{j,1}{k} = indexes(i);
+        k = k + 1;
     end
 end
