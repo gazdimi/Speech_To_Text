@@ -34,15 +34,19 @@ diff = []; %difference between ZCR peaks to detect voiced areas
 for i=1:length(indexes)-1
     diff(i)=indexes(i+1)-indexes(i);
 end
-
-digits = [];
+%S={{1,2,3,7,8,10}; {4,5,6}; {7,8}}; | S{3,1} | S{3,1}{:} example with cell
+%array
+digits = {};
 j=1;
-digits(1,1) = indexes(1);
+digits{1,1}{1} = indexes(1);
+k = 2;
 for i=2:length(indexes)
     if(diff(i-1)>round(max(diff)/2))
         j = j + 1;
-    end
-    digits(j,i) = indexes(i);
+        k = 1;
+    end 
+    digits{j,1}{k} = indexes(i);
+    k = k + 1;
 end
 
 
