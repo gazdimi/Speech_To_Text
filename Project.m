@@ -25,11 +25,8 @@ ZCR_peaks = points_of_interest(DZCR);
 DWZ = detect_window_digits(ZCR_peaks);
 %figure, plot(DZCR, '-b'); hold on; plot(ZCR_peaks, 'linestyle', 'none', 'marker','*'); hold on;
 
-digit_1 = Segments(:,10:22);
-[rows_1, columns_1] = size(digit_1);
-one = reshape(digit_1,rows_1*columns_1,1);
-sound(one,fs);
-audiowrite('one.wav',one,fs);
+Digits = get_digits(DWE, DWZ, Segments);
+%sound(Digits{1,6},fs); to sound last digit, the 6th
 
 function Segments = cut_signal(X, N, L) %signal, window, overlap
     Segments = [];
@@ -101,5 +98,36 @@ function D = detect_window_digits(ZCR_peaks)
         end 
         D{j,1}{k} = indexes(i);
         k = k + 1;
+    end
+end
+
+function Digits = get_digits(DWE, DWZ, Segments)
+    digits = {};
+    [rows, columns] = size(DWE);
+    for i=1:rows
+        for j=1:columns
+            for k=1:length(DWE{i,j})
+                if (k==1)
+                    digits{i,j}{k} = DWZ{i,j}{k};
+                    first = DWZ{i,j}{k};
+                    p = 1;
+                end
+                if (DWE{i,j}{k} > first)
+                    p = p + 1;
+                    digits{i,j}{p} = DWE{i,j}{k};
+                end
+            end
+        end
+        first = 0;
+    end
+    [r, c] = size(digits);
+    Digits={r};
+    for i=1:r
+        for j=1:c
+            last = length(digits{i,j});
+            digit = Segments(:,digits{i,j}{1}:digits{i,j}{last});
+            [rows_d, columns_d] = size(digit);
+            Digits{i} = reshape(digit,rows_d*columns_d,1);
+        end
     end
 end
