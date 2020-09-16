@@ -7,9 +7,9 @@ Hd = humanEar(); filteredSignal = filter(Hd, x);
 figure("Name", 'Original signal vs Filtered signal'); plot(time, x);
 hold on; plot(time, filteredSignal), xlabel('Time'), ylabel('Amplitude');
 hold on;
-Segments = cut_signal(filteredSignal(:,1), 2048, 1024);
+Segments = cut_signal(filteredSignal(:,1), 2048, 2048); %2048, 1024
 
-E = short_time_energy(filteredSignal(:,1), 2048, 1024); %4096, 2048
+E = short_time_energy(filteredSignal(:,1), 2048, 2048); %4096, 2048 | 2048, 1024
 DE = 10*log10(E); %energy in decibel
 E_peaks = points_of_interest(DE);
 DWE = detect_window_digits(E_peaks);
@@ -19,13 +19,19 @@ figure("Name", 'Short time energy in decibel perceptible by humans');
 plot(95 + 10*log10(E));                          %energy in decibel
 hold on;
 
-ZCR = zcr(filteredSignal(:,1), 2048, 1024); %4096, 2048
+ZCR = zcr(filteredSignal(:,1), 2048, 2048); %4096, 2048 | 2048, 1024
 DZCR = 10*log10(ZCR);   %zero crossing rate in decibel
 ZCR_peaks = points_of_interest(DZCR);
 DWZ = detect_window_digits(ZCR_peaks);
 %figure, plot(DZCR, '-b'); hold on; plot(ZCR_peaks, 'linestyle', 'none', 'marker','*'); hold on;
 
-function Segments = cut_signal(X, N, L)
+digit_1 = Segments(:,10:22);
+[rows_1, columns_1] = size(digit_1);
+one = reshape(digit_1,rows_1*columns_1,1);
+sound(one,fs);
+audiowrite('one.wav',one,fs);
+
+function Segments = cut_signal(X, N, L) %signal, window, overlap
     Segments = [];
     m = 0;
     while m * L + N-1 + 1 <= length(X) %while current window has not reached end of signal (is not the last one)
