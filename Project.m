@@ -1,15 +1,15 @@
 clear, clc;
 
-[x, fs] = audioread('Samples\6_numbers.wav');
+[x, fs] = audioread('.\Samples\6_numbers.wav');
 time = (1:length(x))*1/fs;  %time in seconds
 
 Hd = humanEar(); filteredSignal = filter(Hd, x);
 figure("Name", 'Original signal vs Filtered signal'); plot(time, x);
 hold on; plot(time, filteredSignal), xlabel('Time'), ylabel('Amplitude');
 hold on;
-Segments = cut_signal(filteredSignal(:,1), 2048, 2048); %2048, 1024
+Segments = cut_signal(filteredSignal(:,1), 2048, 2048);
 
-E = short_time_energy(filteredSignal(:,1), 2048, 2048); %4096, 2048 | 2048, 1024
+E = short_time_energy(filteredSignal(:,1), 2048, 2048);
 DE = 10*log10(E); %energy in decibel
 E_peaks = points_of_interest(DE);
 DWE = detect_window_digits(E_peaks);
@@ -19,7 +19,7 @@ figure("Name", 'Short time energy in decibel perceptible by humans');
 plot(95 + 10*log10(E));                          %energy in decibel
 hold on;
 
-ZCR = zcr(filteredSignal(:,1), 2048, 2048); %4096, 2048 | 2048, 1024
+ZCR = zcr(filteredSignal(:,1), 2048, 2048);
 DZCR = 10*log10(ZCR);   %zero crossing rate in decibel
 ZCR_peaks = points_of_interest(DZCR);
 DWZ = detect_window_digits(ZCR_peaks);
@@ -27,6 +27,8 @@ DWZ = detect_window_digits(ZCR_peaks);
 
 Digits = get_digits(DWE, DWZ, Segments);
 %sound(Digits{1,6},fs); to sound last digit, the 6th
+
+iso = template_digits(); %set of template words
 
 function Segments = cut_signal(X, N, L) %signal, window, overlap
     Segments = [];
@@ -129,5 +131,16 @@ function Digits = get_digits(DWE, DWZ, Segments)
             [rows_d, columns_d] = size(digit);
             Digits{i} = reshape(digit,rows_d*columns_d,1);
         end
+    end
+end
+
+function iso = template_digits()
+    iso = {9};
+    for i=1:9
+        filename = sprintf('%i.wav',i);
+        file = fullfile('.\isolation',filename);
+        x = audioread(file);
+        [~,name,~] = fileparts(file);
+        iso{i} = {x, name};
     end
 end
