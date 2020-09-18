@@ -28,7 +28,27 @@ DWZ = detect_window_digits(ZCR_peaks);
 Digits = get_digits(DWE, DWZ, Segments);
 %sound(Digits{1,6},fs); to sound last digit, the 6th
 
-iso = template_digits(); %set of template words
+[iso, labels] = template_digits();
+temp = [];
+el = length(Digits{1,1});
+ISO = [9,el];
+for i=1:9
+    iel = length(iso{i,1});
+    if(el>iel)
+        %temp = zeros(1, el - iel);
+        temp = NaN(1, el - iel);
+    end
+    for j=1:length(iso{i,1})
+        ISO(i,j) = iso{i,1}(1,j);
+    end
+    ISO(i,j+1:el) = temp; %horzcat(ISO(i,:), temp);
+    temp = [];
+end
+
+Digit = reshape(Digits{1,1}(:,1),1,el);
+model = fitcecoc(ISO, labels);
+[result, score] = predict(model,Digit);
+
 
 function Segments = cut_signal(X, N, L) %signal, window, overlap
     Segments = [];
@@ -134,13 +154,17 @@ function Digits = get_digits(DWE, DWZ, Segments)
     end
 end
 
-function iso = template_digits()
+function [iso, labels] = template_digits()
     iso = {9};
+    labels = {9};
     for i=1:9
         filename = sprintf('%i.wav',i);
         file = fullfile('.\isolation',filename);
         x = audioread(file);
+        [rows, columns] = size(x);
+        x = reshape(x, 1, rows*columns);
         [~,name,~] = fileparts(file);
-        iso{i} = {x, name};
+        iso{i,:} = x;                               %{x, name};
+        labels{i,:} = name;
     end
 end
